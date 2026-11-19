@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fleetops-grafana-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  fleetops-overview.json: |
+    {
+      "id": null,
+      "uid": "fleetops-overview",
+      "title": "FleetOps Lab Overview",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "30s",
+      "time": {"from": "now-1h", "to": "now"},
+      "panels": [
+        {"id": 1, "title": "Ready nodes", "type": "stat", "gridPos": {"h": 5, "w": 6, "x": 0, "y": 0}, "targets": [{"expr": "sum(kube_node_status_condition{condition=\"Ready\",status=\"true\"})", "refId": "A"}]},
+        {"id": 2, "title": "Pod restarts by namespace", "type": "timeseries", "gridPos": {"h": 8, "w": 12, "x": 6, "y": 0}, "targets": [{"expr": "sum by (namespace) (increase(kube_pod_container_status_restarts_total[1h]))", "legendFormat": "{{namespace}}", "refId": "A"}]},
+        {"id": 3, "title": "Request rate", "type": "timeseries", "gridPos": {"h": 8, "w": 12, "x": 0, "y": 5}, "targets": [{"expr": "sum(rate(fleetops_http_requests_total[5m]))", "legendFormat": "requests/s", "refId": "A"}]},
+        {"id": 4, "title": "5xx error rate", "type": "timeseries", "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}, "targets": [{"expr": "sum(rate(fleetops_http_requests_total{status=~\"5..\"}[5m])) / clamp_min(sum(rate(fleetops_http_requests_total[5m])), 0.000001)", "legendFormat": "error ratio", "refId": "A"}]},
+        {"id": 5, "title": "p95 latency", "type": "timeseries", "gridPos": {"h": 8, "w": 12, "x": 0, "y": 13}, "targets": [{"expr": "histogram_quantile(0.95, sum by (le) (rate(fleetops_http_request_duration_seconds_bucket[5m])))", "legendFormat": "p95", "refId": "A"}]}
+      ]
+    }
