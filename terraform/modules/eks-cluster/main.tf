@@ -22,7 +22,7 @@ module "vpc" {
 
   public_subnet_tags = { "kubernetes.io/role/elb" = "1" }
   private_subnet_tags = {
-    "kubernetes.io/role/internal-elb"       = "1"
+    "kubernetes.io/role/internal-elb"           = "1"
     "kubernetes.io/cluster/${var.cluster_name}" = "shared"
   }
 
@@ -38,8 +38,8 @@ module "eks" {
 
   enable_irsa                              = true
   enable_cluster_creator_admin_permissions = true
-  endpoint_private_access                 = true
-  endpoint_public_access                  = true
+  endpoint_private_access                  = true
+  endpoint_public_access                   = true
   endpoint_public_access_cidrs             = var.endpoint_public_access_cidrs
 
   vpc_id                   = module.vpc.vpc_id

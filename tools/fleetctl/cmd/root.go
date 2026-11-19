@@ -83,8 +83,8 @@ func newClustersCommand() *cobra.Command {
 
 func writeClusterRows(w io.Writer, rows []clusterRow) error {
 	tw:=tabwriter.NewWriter(w,0,4,2,' ',0)
-	fmt.Fprintln(tw,"CONTEXT\tREACHABLE\tAPI VERSION\tNODES\tERROR")
-	for _,row:=range rows { fmt.Fprintf(tw,"%s\t%t\t%s\t%d\t%s\n",row.Context,row.Reachable,row.Version,row.NodeCount,row.Error) }
+	if _, err := fmt.Fprintln(tw,"CONTEXT\tREACHABLE\tAPI VERSION\tNODES\tERROR"); err != nil { return err }
+	for _,row:=range rows { if _, err := fmt.Fprintf(tw,"%s\t%t\t%s\t%d\t%s\n",row.Context,row.Reachable,row.Version,row.NodeCount,row.Error); err != nil { return err } }
 	return tw.Flush()
 }
 
@@ -117,8 +117,10 @@ func newNodesCommand() *cobra.Command {
 				rows=append(rows,nodeRow{Name:node.Name,Ready:ready,KubeletVersion:node.Status.NodeInfo.KubeletVersion,OSImage:node.Status.NodeInfo.OSImage,KernelVersion:node.Status.NodeInfo.KernelVersion,Age:time.Since(node.CreationTimestamp.Time).Round(time.Second).String(),VersionSkew:minor(node.Status.NodeInfo.KubeletVersion)!=minor(server.GitVersion)})
 			}
 			return writeOutput(cmd.OutOrStdout(),output,rows,func(w io.Writer)error{
-				tw:=tabwriter.NewWriter(w,0,4,2,' ',0);fmt.Fprintln(tw,"NAME\tREADY\tKUBELET\tOS IMAGE\tKERNEL\tAGE\tVERSION SKEW")
-				for _,row:=range rows{fmt.Fprintf(tw,"%s\t%t\t%s\t%s\t%s\t%s\t%t\n",row.Name,row.Ready,row.KubeletVersion,row.OSImage,row.KernelVersion,row.Age,row.VersionSkew)};return tw.Flush()
+				tw:=tabwriter.NewWriter(w,0,4,2,' ',0)
+				if _, err := fmt.Fprintln(tw,"NAME\tREADY\tKUBELET\tOS IMAGE\tKERNEL\tAGE\tVERSION SKEW"); err != nil { return err }
+				for _,row:=range rows { if _, err := fmt.Fprintf(tw,"%s\t%t\t%s\t%s\t%s\t%s\t%t\n",row.Name,row.Ready,row.KubeletVersion,row.OSImage,row.KernelVersion,row.Age,row.VersionSkew); err != nil { return err } }
+				return tw.Flush()
 			})
 		},
 	}
@@ -146,7 +148,12 @@ func newImagesCommand() *cobra.Command {
 		}
 		images:=make([]string,0,len(counts));for image:=range counts{images=append(images,image)};sort.Strings(images)
 		rows:=make([]imageRow,0,len(images));for _,image:=range images{rows=append(rows,imageRow{Image:image,PodCount:counts[image]})}
-		return writeOutput(cmd.OutOrStdout(),output,rows,func(w io.Writer)error{tw:=tabwriter.NewWriter(w,0,4,2,' ',0);fmt.Fprintln(tw,"IMAGE\tPODS");for _,row:=range rows{fmt.Fprintf(tw,"%s\t%d\n",row.Image,row.PodCount)};return tw.Flush()})
+		return writeOutput(cmd.OutOrStdout(),output,rows,func(w io.Writer)error{
+			tw:=tabwriter.NewWriter(w,0,4,2,' ',0)
+			if _, err := fmt.Fprintln(tw,"IMAGE\tPODS"); err != nil { return err }
+			for _,row:=range rows { if _, err := fmt.Fprintf(tw,"%s\t%d\n",row.Image,row.PodCount); err != nil { return err } }
+			return tw.Flush()
+		})
 	}}
 	command.Flags().StringVarP(&contextName,"context","c","","Kubeconfig context")
 	command.Flags().StringVarP(&output,"output","o","table","Output format: table or json")
@@ -174,8 +181,10 @@ func newAuditCommand() *cobra.Command {
 		if err:=group.Wait();err!=nil{return err};close(results)
 		findings:=[]audit.Finding{};for result:=range results{findings=append(findings,result.findings...)}
 		sort.Slice(findings,func(i,j int)bool{if findings[i].Cluster!=findings[j].Cluster{return findings[i].Cluster<findings[j].Cluster};if findings[i].Severity!=findings[j].Severity{return findings[i].Severity<findings[j].Severity};return findings[i].Rule<findings[j].Rule})
-		tw:=tabwriter.NewWriter(cmd.OutOrStdout(),0,4,2,' ',0);fmt.Fprintln(tw,"CLUSTER\tSEVERITY\tRULE\tRESOURCE\tMESSAGE")
-		high:=false;for _,finding:=range findings{fmt.Fprintf(tw,"%s\t%s\t%s\t%s\t%s\n",finding.Cluster,finding.Severity,finding.Rule,finding.Resource,finding.Message);if finding.Severity==audit.SeverityHigh{high=true}}
+		tw:=tabwriter.NewWriter(cmd.OutOrStdout(),0,4,2,' ',0)
+		if _, err := fmt.Fprintln(tw,"CLUSTER\tSEVERITY\tRULE\tRESOURCE\tMESSAGE"); err != nil { return err }
+		high:=false
+		for _,finding:=range findings{if _, err := fmt.Fprintf(tw,"%s\t%s\t%s\t%s\t%s\n",finding.Cluster,finding.Severity,finding.Rule,finding.Resource,finding.Message); err != nil { return err };if finding.Severity==audit.SeverityHigh{high=true}}
 		if err:=tw.Flush();err!=nil{return err};if high{return ErrHighFindings};return nil
 	}}
 	command.Flags().BoolVar(&all,"all",false,"Audit all contexts in kubeconfig in parallel")

@@ -1,2 +1,7 @@
-# Trivy ignore file
-# Do not add an exception without a CVE ID, written reason, and expiry date.
+# Time-limited Terraform misconfiguration exceptions. Reassess before expiry.
+# AWS-0040: public API endpoint is restricted to the operator-provided /32; required for the short-lived laptop EKS exercise. Expiry 2026-12-18.
+AWS-0040 exp:2026-12-18
+# AWS-0104: private nodes egress through one NAT for ECR, EKS add-ons, and image pulls; no public node IPs or inbound rule. Reassess endpoint-specific egress before production use. Expiry 2026-12-18.
+AWS-0104 exp:2026-12-18
+# AWS-0132: state bucket uses SSE-S3, versioning, and public access blocks; no application secrets are stored in Terraform state. Expiry 2026-12-18.
+AWS-0132 exp:2026-12-18

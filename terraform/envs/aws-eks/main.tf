@@ -41,8 +41,8 @@ provider "aws" {
 module "eks_cluster" {
   source = "../../modules/eks-cluster"
 
-  cluster_name                  = var.cluster_name
-  kubernetes_version            = var.kubernetes_version
+  cluster_name                 = var.cluster_name
+  kubernetes_version           = var.kubernetes_version
   endpoint_public_access_cidrs = var.endpoint_public_access_cidrs
 }
 

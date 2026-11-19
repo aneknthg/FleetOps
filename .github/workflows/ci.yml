@@ -28,7 +28,7 @@ jobs:
           terraform_version: 1.10.5
       - uses: terraform-linters/setup-tflint@v4
       - name: Check formatting
-        run: terraform fmt -diff -recursive terraform && terraform fmt -check -recursive terraform
+        run: terraform fmt -check -recursive terraform
       - name: Initialize without backend
         run: terraform -chdir=terraform/${{ matrix.path }} init -backend=false -input=false
       - name: Validate
