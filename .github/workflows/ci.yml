@@ -45,6 +45,9 @@ jobs:
       - name: Test sample app
         working-directory: sample-app
         run: go test ./...
+      - name: Download fleetctl dependencies
+        working-directory: tools/fleetctl
+        run: go mod download
       - name: Test fleetctl
         working-directory: tools/fleetctl
         run: go test ./...
@@ -70,6 +73,9 @@ jobs:
         with:
           go-version: '1.25.x'
           cache-dependency-path: tools/fleetctl/go.mod
+      - name: Download dependencies
+        working-directory: tools/fleetctl
+        run: go mod download
       - name: Build
         working-directory: tools/fleetctl
         env:
