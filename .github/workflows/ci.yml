@@ -48,7 +48,7 @@ jobs:
         run: pip install yamllint
       - name: Lint YAML
         run: yamllint -c .yamllint .
-      - uses: azure/setup-kubectl@v4
+      - uses: azure/setup-kubectl@v5
         with:
           version: 'v1.35.0'
       - name: Install kubeconform
