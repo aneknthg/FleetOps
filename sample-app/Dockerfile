@@ -4,7 +4,7 @@ COPY go.mod ./
 COPY main.go ./
 RUN go mod tidy && CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o /out/sample-app .
 
-FROM alpine:3.24.3
+FROM alpine:3.24.4
 RUN addgroup -S app && adduser -S -G app app
 COPY --from=build /out/sample-app /usr/local/bin/sample-app
 USER app
