@@ -14,7 +14,7 @@ jobs:
     name: Scan sample image and infrastructure
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build sample app image
         run: docker build --pull -t fleetops-sample-app:${{ github.sha }} ./sample-app
       - name: Scan image for fixable HIGH and CRITICAL vulnerabilities
