@@ -1,6 +1,6 @@
 module github.com/aneknthg/fleetops/tools/fleetctl
 
-go 1.25
+go 1.26
 
 require (
 	github.com/spf13/cobra v1.10.2
@@ -10,3 +10,4 @@ require (
 	k8s.io/client-go v0.36.6
 	sigs.k8s.io/yaml v1.6.0
 )
+
