@@ -10,11 +10,16 @@ updates:
       - /tools/fleetctl
     schedule:
       interval: weekly
+    groups:
+      kubernetes-modules:
+        patterns:
+          - k8s.io/*
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
   - package-ecosystem: terraform
-    directory: /terraform
+    directories:
+      - /terraform/**
     schedule:
       interval: weekly
