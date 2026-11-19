@@ -20,4 +20,3 @@ test:
 
 scan:
 	trivy config terraform/ gitops/
-

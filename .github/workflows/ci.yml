@@ -15,7 +15,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        environment: [local-mgmt, local-dev, local-prod]
+        include:
+          - path: bootstrap-state
+          - path: envs/local-mgmt
+          - path: envs/local-dev
+          - path: envs/local-prod
+          - path: envs/aws-eks
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
@@ -25,11 +30,41 @@ jobs:
       - name: Check formatting
         run: terraform fmt -check -recursive terraform
       - name: Initialize without backend
-        run: terraform -chdir=terraform/envs/${{ matrix.environment }} init -backend=false -input=false
+        run: terraform -chdir=terraform/${{ matrix.path }} init -backend=false -input=false
       - name: Validate
-        run: terraform -chdir=terraform/envs/${{ matrix.environment }} validate
+        run: terraform -chdir=terraform/${{ matrix.path }} validate
       - name: Lint
-        run: tflint --chdir=terraform/envs/${{ matrix.environment }}
+        run: tflint --chdir=terraform/${{ matrix.path }}
+
+  manifests:
+    name: YAML, Kustomize, and shell checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Install yamllint
+        run: pip install yamllint
+      - name: Lint YAML
+        run: yamllint -c .yamllint .
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.35.0'
+      - name: Install kubeconform
+        run: |
+          curl -fsSL https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz -o /tmp/kubeconform.tar.gz
+          sudo tar -xzf /tmp/kubeconform.tar.gz -C /usr/local/bin kubeconform
+      - name: Build and validate Kustomize overlays
+        run: |
+          for overlay in gitops/apps/*/overlays/*; do
+            echo "Validating ${overlay}"
+            kubectl kustomize "$overlay" | kubeconform -strict -summary -ignore-missing-schemas
+          done
+      - name: Install ShellCheck
+        run: sudo apt-get update && sudo apt-get install --yes shellcheck
+      - name: Lint shell scripts
+        run: shellcheck scripts/bootstrap.sh scripts/rotate-kubeconfig.sh scripts/cve-report.sh
 
   go:
     name: Go checks
@@ -45,9 +80,11 @@ jobs:
       - name: Test sample app
         working-directory: sample-app
         run: go mod tidy && go test ./...
-      - name: Resolve and lock fleetctl dependencies
+      - name: Resolve fleetctl dependencies
         working-directory: tools/fleetctl
         run: go mod tidy
+      - name: Format Go code
+        run: gofmt -w $(find sample-app tools/fleetctl -name '*.go' -type f)
       - name: Test fleetctl
         working-directory: tools/fleetctl
         run: go test ./...
@@ -73,9 +110,11 @@ jobs:
         with:
           go-version: '1.27.x'
           cache-dependency-path: tools/fleetctl/go.mod
-      - name: Resolve and lock dependencies
+      - name: Resolve dependencies
         working-directory: tools/fleetctl
         run: go mod tidy
+      - name: Format Go code
+        run: gofmt -w $(find tools/fleetctl -name '*.go' -type f)
       - name: Build
         working-directory: tools/fleetctl
         env:
@@ -86,6 +125,3 @@ jobs:
         with:
           name: fleetctl-${{ matrix.goos }}-${{ matrix.goarch }}
           path: tools/fleetctl/dist/fleetctl-${{ matrix.goos }}-${{ matrix.goarch }}
-
-
-

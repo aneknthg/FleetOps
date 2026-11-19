@@ -18,7 +18,7 @@ jobs:
       - name: Build sample app image
         run: docker build --pull -t fleetops-sample-app:${{ github.sha }} ./sample-app
       - name: Scan image for fixable HIGH and CRITICAL vulnerabilities
-        uses: aquasecurity/trivy-action@0.36.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: fleetops-sample-app:${{ github.sha }}
           format: table
@@ -26,7 +26,7 @@ jobs:
           ignore-unfixed: true
           severity: CRITICAL,HIGH
       - name: Scan Terraform configuration
-        uses: aquasecurity/trivy-action@0.36.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: config
           scan-ref: terraform/
@@ -35,7 +35,7 @@ jobs:
           ignore-unfixed: true
           severity: CRITICAL,HIGH
       - name: Scan Kubernetes configuration
-        uses: aquasecurity/trivy-action@0.36.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: config
           scan-ref: gitops/

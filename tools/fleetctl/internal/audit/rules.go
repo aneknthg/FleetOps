@@ -166,7 +166,7 @@ func selectorMatches(selector, labels map[string]string) bool {
 
 func minorVersion(version string) (int, bool) {
 	match := versionPattern.FindStringSubmatch(version)
-	if len(match) != 3 {
+	if len(match) < 3 {
 		return 0, false
 	}
 	minor, err := strconv.Atoi(match[2])
@@ -200,12 +200,3 @@ func compareParts(a, b []int) int {
 func finding(s Snapshot, severity Severity, rule, resource, message string) Finding {
 	return Finding{Cluster: s.Cluster, Severity: severity, Rule: rule, Resource: resource, Message: message}
 }
-
-
-
-
-
-
-
-
-

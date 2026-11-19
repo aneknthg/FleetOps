@@ -172,7 +172,7 @@ func newAuditCommand() *cobra.Command {
 			results<-result{audit.Analyze(snapshot,minimum,time.Now())};return nil
 		})}
 		if err:=group.Wait();err!=nil{return err};close(results)
-		findings:=[]audit.Finding{};for result:=range results{findings=append(findings,result.findings)}
+		findings:=[]audit.Finding{};for result:=range results{findings=append(findings,result.findings...)}
 		sort.Slice(findings,func(i,j int)bool{if findings[i].Cluster!=findings[j].Cluster{return findings[i].Cluster<findings[j].Cluster};if findings[i].Severity!=findings[j].Severity{return findings[i].Severity<findings[j].Severity};return findings[i].Rule<findings[j].Rule})
 		tw:=tabwriter.NewWriter(cmd.OutOrStdout(),0,4,2,' ',0);fmt.Fprintln(tw,"CLUSTER\tSEVERITY\tRULE\tRESOURCE\tMESSAGE")
 		high:=false;for _,finding:=range findings{fmt.Fprintf(tw,"%s\t%s\t%s\t%s\t%s\n",finding.Cluster,finding.Severity,finding.Rule,finding.Resource,finding.Message);if finding.Severity==audit.SeverityHigh{high=true}}
@@ -229,7 +229,3 @@ func minimumKernelVersion(_ string) (string, error) {
 	if config.MinimumKernelVersion == "" { return "5.15.0", nil }
 	return config.MinimumKernelVersion, nil
 }
-
-
-
-

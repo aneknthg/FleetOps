@@ -3,6 +3,8 @@
 .kubeconfig*
 *.tfstate
 *.tfstate.*
+*.tfvars
+!*.tfvars.example
 .terraform/
 *.tfplan
 *.out
@@ -19,5 +21,3 @@
 reports/cve-*.md
 *.png
 *.mp4
-
-

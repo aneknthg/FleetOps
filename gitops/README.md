@@ -1,14 +1,20 @@
-# Sample app and GitOps
+# GitOps structure
 
-The sample service exposes `/healthz` and `/version`. Build it with:
+Argo CD runs on the `mgmt` cluster. The root Application under `gitops/bootstrap/` manages the ApplicationSet and the dev monitoring Helm Application. The ApplicationSet creates one app per cluster/app overlay; dev auto-syncs with self-heal while prod is manual.
+
+The workload app at `gitops/apps/sample-app/` deploys the sample service. Monitoring is split into a chart Application in `gitops/bootstrap/apps/monitoring-stack-dev.yaml` and Kubernetes resources in `gitops/apps/monitoring/overlays/dev/`. This keeps Argo CD Application objects on the management cluster and the service monitor, alert rules, and dashboard on dev.
+
+The sample service exposes `/healthz`, `/version`, and `/metrics`. Prometheus scrapes it through a ServiceMonitor; four alert rules link to runbooks. Grafana discovers the labeled dashboard ConfigMap through its sidecar.
+
+## Build and publish the app image
 
 ```sh
-docker build -t fleetops-sample-app:0.1.0 ./sample-app
+docker build -t ghcr.io/aneknthg/fleetops-sample-app:0.1.0 ./sample-app
+docker push ghcr.io/aneknthg/fleetops-sample-app:0.1.0
 ```
 
-The repo URL and GHCR image name are set for `aneknthg/FleetOps`. Publish `ghcr.io/aneknthg/fleetops-sample-app:0.1.0` to GHCR before deploying. Do not commit a registry token.
+Authenticate to GHCR before pushing. Never put a registry token or kubeconfig in Git. The app deployment uses the GHCR image; Argo CD can pull it once the package is public or image pull credentials are configured.
 
-`gitops/apps/sample-app/base` defines two replicas, resource requests and limits, health probes, a PDB, and topology spreading. The `dev` overlay is intended to auto-sync; `prod` is intended to sync manually. `gitops/bootstrap/applicationset.yaml` generates an Application for each app overlay and registered cluster.
+## Bootstrap
 
-The bootstrap script installs the Argo CD Helm chart version 10.18.0 on `mgmt`, registers `dev` and `prod` using internal kind endpoints, then applies the root Application. It requires local clusters named `mgmt`, `dev`, and `prod`, and the `argocd`, `helm`, and `kind` CLIs.
-The dev overlay deploys the sample Go service and the monitoring application. The service exposes Prometheus metrics on `/metrics`; a `ServiceMonitor` selects it, and the dev Prometheus instance loads the rules and Grafana dashboard from `gitops/apps/monitoring/resources/`.
+After `make up`, run `scripts/bootstrap.sh`. The script installs the pinned Argo CD Helm chart on `mgmt`, registers the workload clusters using kind's internal endpoints, and applies the root Application. It requires Docker, kind, Helm, kubectl, and argocd CLIs.
