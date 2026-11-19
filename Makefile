@@ -16,7 +16,7 @@ down:
 	done
 
 test:
-	cd sample-app && go test ./... && cd ../tools/fleetctl && go mod tidy && go test ./...
+	cd sample-app && go mod tidy && go test ./... && cd ../tools/fleetctl && go mod tidy && go test ./...
 
 scan:
 	trivy config terraform/ gitops/

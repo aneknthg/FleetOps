@@ -44,7 +44,7 @@ jobs:
             tools/fleetctl/go.mod
       - name: Test sample app
         working-directory: sample-app
-        run: go test ./...
+        run: go mod tidy && go test ./...
       - name: Resolve and lock fleetctl dependencies
         working-directory: tools/fleetctl
         run: go mod tidy

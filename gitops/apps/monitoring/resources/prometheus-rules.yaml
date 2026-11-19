@@ -1,0 +1,47 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: fleetops-alerts
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  groups:
+    - name: fleetops.platform
+      rules:
+        - alert: NodeNotReady
+          expr: kube_node_status_condition{condition="Ready",status="true"} == 0
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: Kubernetes node is not Ready
+            description: Node {{ $labels.node }} has been not Ready for more than 2 minutes.
+            runbook_url: https://github.com/aneknthg/FleetOps/blob/main/docs/runbooks/node-not-ready.md
+        - alert: PodCrashLooping
+          expr: increase(kube_pod_container_status_restarts_total[10m]) > 3
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: Container is repeatedly restarting
+            description: Pod {{ $labels.namespace }}/{{ $labels.pod }} has restarted more than 3 times in 10 minutes.
+            runbook_url: https://github.com/aneknthg/FleetOps/blob/main/docs/runbooks/rollback-bad-deploy.md
+        - alert: DeploymentReplicasMismatch
+          expr: kube_deployment_status_replicas_available < kube_deployment_spec_replicas
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: Deployment has fewer available than desired replicas
+            description: Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has fewer available replicas than desired.
+            runbook_url: https://github.com/aneknthg/FleetOps/blob/main/docs/runbooks/rollback-bad-deploy.md
+        - alert: SampleAppHighErrorRate
+          expr: sum(rate(fleetops_http_requests_total{status=~"5.."}[5m])) / clamp_min(sum(rate(fleetops_http_requests_total[5m])), 0.000001) > 0.05
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: FleetOps sample app error rate is above 5 percent
+            description: The sample app has had a 5xx ratio above 5 percent for 5 minutes.
+            runbook_url: https://github.com/aneknthg/FleetOps/blob/main/docs/runbooks/rollback-bad-deploy.md
