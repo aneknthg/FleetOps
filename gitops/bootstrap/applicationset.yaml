@@ -1,0 +1,49 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: fleetops-apps
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: [missingkey=error]
+  generators:
+    - matrix:
+        generators:
+          - list:
+              elements:
+                - name: dev
+                  server: https://dev-control-plane:6443
+                  autoSync: "true"
+                - name: prod
+                  server: https://prod-control-plane:6443
+                  autoSync: "false"
+          - git:
+              repoURL: https://github.com/aneknthg/FleetOps.git
+              revision: main
+              directories:
+                - path: gitops/apps/*/overlays/{{.name}}
+  template:
+    metadata:
+      name: '{{ index .path.segments 2 }}-{{.name}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/aneknthg/FleetOps.git
+        targetRevision: main
+        path: '{{.path.path}}'
+      destination:
+        server: '{{.server}}'
+        namespace: default
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+  templatePatch: |
+    {{- if eq .autoSync "true" }}
+    spec:
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+    {{- end }}

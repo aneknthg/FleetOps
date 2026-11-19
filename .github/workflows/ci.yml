@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    name: Terraform checks
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [local-mgmt, local-dev, local-prod]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.5
+      - uses: terraform-linters/setup-tflint@v4
+      - name: Check formatting
+        run: terraform fmt -check -recursive terraform
+      - name: Initialize without backend
+        run: terraform -chdir=terraform/envs/${{ matrix.environment }} init -backend=false -input=false
+      - name: Validate
+        run: terraform -chdir=terraform/envs/${{ matrix.environment }} validate
+      - name: Lint
+        run: tflint --chdir=terraform/envs/${{ matrix.environment }}

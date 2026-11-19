@@ -1,0 +1,23 @@
+# Local credentials and generated state
+.kube/
+.kubeconfig*
+*.tfstate
+*.tfstate.*
+.terraform/
+*.tfplan
+*.out
+.env
+.env.*
+!.env.example
+
+# Go build output
+/tools/fleetctl/fleetctl
+/tools/fleetctl/dist/
+/sample-app/sample-app
+
+# Reports and local artifacts
+reports/cve-*.md
+*.png
+*.mp4
+
+
