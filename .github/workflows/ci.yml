@@ -23,7 +23,7 @@ jobs:
           - path: envs/aws-eks
     steps:
       - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: 1.10.5
       - uses: terraform-linters/setup-tflint@v4
