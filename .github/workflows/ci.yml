@@ -45,9 +45,9 @@ jobs:
       - name: Test sample app
         working-directory: sample-app
         run: go test ./...
-      - name: Download fleetctl dependencies
+      - name: Resolve and lock fleetctl dependencies
         working-directory: tools/fleetctl
-        run: go mod download
+        run: go mod tidy
       - name: Test fleetctl
         working-directory: tools/fleetctl
         run: go test ./...
@@ -73,9 +73,9 @@ jobs:
         with:
           go-version: '1.27.x'
           cache-dependency-path: tools/fleetctl/go.mod
-      - name: Download dependencies
+      - name: Resolve and lock dependencies
         working-directory: tools/fleetctl
-        run: go mod download
+        run: go mod tidy
       - name: Build
         working-directory: tools/fleetctl
         env:
@@ -86,4 +86,6 @@ jobs:
         with:
           name: fleetctl-${{ matrix.goos }}-${{ matrix.goarch }}
           path: tools/fleetctl/dist/fleetctl-${{ matrix.goos }}-${{ matrix.goarch }}
+
+
 

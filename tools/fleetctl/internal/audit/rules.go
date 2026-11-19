@@ -208,3 +208,4 @@ func finding(s Snapshot, severity Severity, rule, resource, message string) Find
 
 
 
+

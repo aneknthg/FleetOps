@@ -5,6 +5,7 @@
 ## Build and test
 
 ```sh
+go mod tidy
 go test ./...
 go build -o fleetctl .
 ```
@@ -45,3 +46,6 @@ fleetctl drain dev-worker --context kind-dev --yes --timeout 10m
 ```
 
 The drain path is covered with client-go fake-client tests, including a rejected eviction.
+
+
+
