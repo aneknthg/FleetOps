@@ -201,10 +201,10 @@ func newDrainCommand() *cobra.Command {
 		client,err:=fleetk8s.NewClient(kubeconfigPath,contextName);if err!=nil{return err}
 		ctx,cancel:=context.WithTimeout(cmd.Context(),timeout+30*time.Second);defer cancel()
 		pods,err:=fleetk8s.DrainNode(ctx,client,args[0],!yes,timeout)
-		for _,pod:=range pods{fmt.Fprintln(cmd.OutOrStdout(),pod)}
+		for _,pod:=range pods{if _,writeErr:=fmt.Fprintln(cmd.OutOrStdout(),pod);writeErr!=nil{return writeErr}}
 		if err!=nil{return err}
-		if !yes{fmt.Fprintf(cmd.OutOrStdout(),"Dry run only. Pass --yes to evict pods.\nUncordon command: kubectl --context %s uncordon %s\n",contextName,args[0]);return nil}
-		fmt.Fprintf(cmd.OutOrStdout(),"Drain complete. Node remains cordoned.\nUncordon command: kubectl --context %s uncordon %s\n",contextName,args[0]);return nil
+		if !yes{_,writeErr:=fmt.Fprintf(cmd.OutOrStdout(),"Dry run only. Pass --yes to evict pods.\nUncordon command: kubectl --context %s uncordon %s\n",contextName,args[0]);return writeErr}
+		_,writeErr:=fmt.Fprintf(cmd.OutOrStdout(),"Drain complete. Node remains cordoned.\nUncordon command: kubectl --context %s uncordon %s\n",contextName,args[0]);return writeErr
 	}}
 	command.Flags().StringVarP(&contextName,"context","c","","Kubeconfig context")
 	command.Flags().BoolVar(&yes,"yes",false,"Cordon and evict pods; without this flag only show a dry run")
