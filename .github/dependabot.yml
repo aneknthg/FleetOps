@@ -1,0 +1,20 @@
+version: 2
+updates:
+  - package-ecosystem: docker
+    directory: /sample-app
+    schedule:
+      interval: weekly
+  - package-ecosystem: gomod
+    directories:
+      - /sample-app
+      - /tools/fleetctl
+    schedule:
+      interval: weekly
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: terraform
+    directory: /terraform
+    schedule:
+      interval: weekly
