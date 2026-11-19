@@ -11,8 +11,8 @@ for command in kubectl helm kind argocd; do
   fi
 done
 
-if grep -R -n "aneknthg" gitops/bootstrap gitops/apps; then
-  echo "Replace aneknthg in GitOps manifests with the actual GitHub owner before bootstrapping." >&2
+if grep -R -n "OWNER" gitops/bootstrap gitops/apps; then
+  echo "Replace OWNER in GitOps manifests with the actual GitHub owner before bootstrapping." >&2
   exit 2
 fi
 

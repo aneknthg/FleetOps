@@ -1,3 +1,3 @@
-module github.com/aneknthg/FleetOps/sample-app
+module github.com/aneknthg/fleetops/sample-app
 
 go 1.25

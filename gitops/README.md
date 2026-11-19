@@ -3,10 +3,10 @@
 The sample service exposes `/healthz` and `/version`. Build it with:
 
 ```sh
-docker build -t FleetOps-sample-app:0.1.0 ./sample-app
+docker build -t fleetops-sample-app:0.1.0 ./sample-app
 ```
 
-Before bootstrapping, replace `aneknthg` in the GitOps manifests with the GitHub owner and push the image to GHCR. Do not commit a registry token.
+The repo URL and GHCR image name are set for `aneknthg/FleetOps`. Publish `ghcr.io/aneknthg/fleetops-sample-app:0.1.0` to GHCR before deploying. Do not commit a registry token.
 
 `gitops/apps/sample-app/base` defines two replicas, resource requests and limits, health probes, a PDB, and topology spreading. The `dev` overlay is intended to auto-sync; `prod` is intended to sync manually. `gitops/bootstrap/applicationset.yaml` generates an Application for each app overlay and registered cluster.
 
