@@ -89,7 +89,7 @@ jobs:
         working-directory: tools/fleetctl
         run: go test ./...
       - name: Lint fleetctl
-        uses: golangci/golangci-lint-action@v8
+        uses: golangci/golangci-lint-action@v9
         with:
           working-directory: tools/fleetctl
           version: latest
