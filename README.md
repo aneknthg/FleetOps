@@ -29,7 +29,7 @@ Feature branch -> pull request checks -> reviewed merge
 
 ## Quick start: local clusters
 
-Install Docker, Terraform 1.6+, GNU Make, Go 1.26+, kind, kubectl, Helm, and Argo CD CLI. Provision and remove the three local clusters:
+Install Docker, Terraform 1.10.5+, GNU Make, Go 1.27+, kind, kubectl, Helm, and Argo CD CLI. On Windows, use Ubuntu on WSL2 with Docker Desktop's WSL integration. The full workstation and credential checklist is in [docs/local-setup.md](docs/local-setup.md).
 
 ```sh
 make up
@@ -41,7 +41,7 @@ The clusters are named `mgmt`, `dev`, and `prod`; the pinned node image is `kind
 
 ## GitOps setup
 
-Build and publish the sample image to `ghcr.io/aneknthg/fleetops-sample-app:0.1.0` before deploying. The repository does not contain registry credentials. See [gitops/README.md](gitops/README.md) for the bootstrap flow. Argo CD uses the management cluster and internal kind endpoints to reach the workload clusters.
+Build and publish the sample image to `ghcr.io/aneknthg/fleetops-sample-app:0.1.0` before deploying. The repository does not contain registry credentials. See [gitops/README.md](gitops/README.md) and [docs/local-setup.md](docs/local-setup.md) for the bootstrap flow. Argo CD uses the management cluster and internal kind endpoints to reach the workload clusters.
 
 The sample app provides `/healthz`, `/version`, and `/metrics`. Prometheus scrapes the dev service; four alerts link to runbooks, and Grafana loads a dashboard from a labeled ConfigMap.
 
@@ -78,7 +78,7 @@ Runbooks: [bad deployment rollback](docs/runbooks/rollback-bad-deploy.md), [node
 
 ## Decisions and limitations
 
-See [docs/decisions/](docs/decisions/) for why the lab uses kind, Argo CD, and safe node draining. kind nodes share the host kernel; three local clusters do not demonstrate 1,000-cluster scale. AWS EKS is coded but remains unprovisioned. The repository currently uses one draft pull request to stage the implementation; branch protection and required checks still need owner configuration after the staged PR is ready. `.github/workflows/terraform-plan.yml` is manual and plan-only for AWS EKS.
+See [docs/decisions/](docs/decisions/) for why the lab uses kind, Argo CD, and safe node draining. The initial implementation is merged into `main` as [PR #1](https://github.com/aneknthg/FleetOps/pull/1). kind nodes share the host kernel; three local clusters do not demonstrate 1,000-cluster scale. AWS EKS is coded but remains unprovisioned. Branch protection is not enabled yet and should be configured by a repository administrator. `.github/workflows/terraform-plan.yml` is manual and plan-only for AWS EKS.
 
 ## Cost and safety
 
