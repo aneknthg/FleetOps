@@ -30,3 +30,53 @@ jobs:
         run: terraform -chdir=terraform/envs/${{ matrix.environment }} validate
       - name: Lint
         run: tflint --chdir=terraform/envs/${{ matrix.environment }}
+
+  go:
+    name: Go checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.25.x'
+          cache-dependency-path: |
+            sample-app/go.mod
+            tools/fleetctl/go.mod
+      - name: Test sample app
+        working-directory: sample-app
+        run: go test ./...
+      - name: Test fleetctl
+        working-directory: tools/fleetctl
+        run: go test ./...
+      - name: Lint fleetctl
+        uses: golangci/golangci-lint-action@v8
+        with:
+          working-directory: tools/fleetctl
+          version: latest
+
+  build:
+    name: Build fleetctl (${{ matrix.goos }}/${{ matrix.goarch }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+          - goos: darwin
+            goarch: arm64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.25.x'
+          cache-dependency-path: tools/fleetctl/go.mod
+      - name: Build
+        working-directory: tools/fleetctl
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: go build -o dist/fleetctl-${{ matrix.goos }}-${{ matrix.goarch }} .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fleetctl-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: tools/fleetctl/dist/fleetctl-${{ matrix.goos }}-${{ matrix.goarch }}
